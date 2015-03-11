@@ -12,7 +12,6 @@ class ImageConverter extends Obj {
     'width'      => 960,
     'height'     => 960,
     'upscale'    => false,
-    'overwrite'  => false,
     'tosRGB'     => false,
     'autoOrient' => false,
   );
@@ -79,8 +78,10 @@ class ImageConverter extends Obj {
     $command[] = isset($this->options['bin']) ? $this->options['bin'] : 'convert';
     
     $command[] = escapeshellarg($this->source->root());
-    
-    $command[] = '-profile ' . __DIR__ . DS . 'sRGB.icc';
+
+    if($this->options['tosRGB']) {
+      $command[] = '-profile ' . __DIR__ . DS . 'sRGB.icc';
+    }
 
     if($this->options['autoOrient']) {
       $command[] = '-auto-orient';
