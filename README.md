@@ -4,26 +4,36 @@ This plugin for [Kirby 2](http://getkirby.com) allows you to convert your images
 
 It is based on the [Thumb](https://github.com/getkirby/toolkit/blob/master/lib/thumb.php) class of the Kirby Toolkit. 
 
-**Version**: 1.0.0
-
-**Author**: [@seehat](https://github.com/seehat/)
-
 **License**: [GNU GPL v3.0](http://opensource.org/licenses/GPL-3.0)
+
+## Requirements
+
+- Imagemagick
+- php `exec` must be allowed
+
+This plugin doesn't work with GDLib. 
 
 ## Installation
 
-You must have a working installation of ImageMagick and php 'exec' must be allowed. This plugin doesn't work with GDLib. 
+Use one of the alternatives below.
 
-### Copy & Pasting
+### 1. Kirby CLI
 
-If not already existing, add a new `plugins` folder to your `site` directory. Then copy or link this repositories whole content in a new `imageconverter` folder there. Afterwards, your directory structure should look like this:
+If you are using the Kirby CLI you can install this plugin by running the following commands in your shell:
 
 ```
-site/
-  plugins/
-    imageconverter/
-      imageconverter.php
-      sRGB.icc
+$ cd path/to/kirby
+$ kirby plugin:install mgf/kirby-imageconverter
+```
+
+
+### 2. Clone or download
+
+1. Clone or [download](https://github.com/madergrafisch/kirby-imageconverter/archive/master.zip)  this repository.
+2. Unzip the archive if needed and rename the folder to `kirby-imageconverter`.
+**Make sure that the plugin folder structure looks like this:**
+```
+site/plugins/kirby-imageconverter/
 ```
 
 ## Usage
@@ -34,7 +44,7 @@ Use kirby 2 [panel upload hook](http://getkirby.com/docs/panel/hooks) to process
 kirby()->hook('panel.file.upload', function($file) {
 
   if ($file->type() == 'image') {
-    $image = new ImageConverter($file, array(
+    $image = new mgf\ImageConverter($file, array(
       'width' => 1024,
       'height' => 1024,
       'tosRGB' => true,
@@ -50,14 +60,14 @@ kirby()->hook('panel.file.upload', function($file) {
 Create a new ImageConverter Object by passing a Media Object and some params. 
 
 ```php
-$image = new ImageConverter($image);
+$image = new mgf\ImageConverter($image);
 $image->process();
 ```
 
 This uses the default options, like below. 
 
 ```php
-$image = new ImageConverter($image, array(
+$image = new mgf\ImageConverter($image, array(
   'width' => 1024,
   'height' => 1024,
   'tosRGB' => true,
@@ -68,7 +78,7 @@ $image->process();
 This converts your image to a maximum size of 1024x1024 px and converts its colorspace to sRGB.
 
 ```php
-$image = new ImageConverter($image, array(
+$image = new mgf\ImageConverter($image, array(
   'filename' => '{name}_resized.{extension}',
 ));
 $image->process();
@@ -93,3 +103,8 @@ The class offers some options, most of them by the Kirby Thumb Class.
 'tosRGB'     => false
 'autoOrient' => false
 ```
+
+## Credits
+
+- [Christian Zehetner](https://github.com/seehat/) - Author
+- [Bastian Allgeier](https://github.com/bastianallgeier) - Author of Kirby Thumbs plugin

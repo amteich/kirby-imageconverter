@@ -1,5 +1,7 @@
 <?php 
 
+namespace mgf;
+
 class ImageConverter extends Obj {
 
   const ERROR_INVALID_IMAGE  = 0;
