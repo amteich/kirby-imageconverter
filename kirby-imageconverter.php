@@ -2,20 +2,31 @@
 
 namespace mgf;
 
+use Obj;
+use Exception;
+use Str;
+use Media;
+use F;
+
 class ImageConverter extends Obj {
 
   const ERROR_INVALID_IMAGE  = 0;
 
   static public $defaults = array(
-    'filename'   => '{name}.{extension}',
+    'destination'=> '{name}.{extension}',
     'url'        => null,
     'root'       => null,
     'quality'    => 100,
-    'width'      => 960,
-    'height'     => 960,
+    'blur'       => false,
+    'blurpx'     => 10,
+    'width'      => null,
+    'height'     => null,
     'upscale'    => false,
+    'crop'       => false,
+    'grayscale'  => false,
     'tosRGB'     => false,
     'autoOrient' => false,
+    'interlace'  => false,
   );
 
   public $source      = null;
@@ -41,7 +52,7 @@ class ImageConverter extends Obj {
     $this->options = array_merge(static::$defaults, $params);
 
     $this->destination = new Obj();
-    $this->destination->filename = str::template($this->options['filename'], array(
+    $this->destination->filename = str::template($this->options['destination'], array(
       'extension'    => $this->source->extension(),
       'name'         => $this->source->name(),
       'filename'     => $this->source->filename(),
@@ -61,6 +72,11 @@ class ImageConverter extends Obj {
 
   }
 
+  public static function convert ($source, $params = array()) {
+    $image = new static($source, $params);
+    return $image->process();
+  }
+
   public function process () {
     // create the image
     $this->create();
@@ -78,36 +94,56 @@ class ImageConverter extends Obj {
 
     $command = array();
     $command[] = isset($this->options['bin']) ? $this->options['bin'] : 'convert';
-    
     $command[] = escapeshellarg($this->source->root());
 
+    // if image has profile -> convert to sRGB
+    // results in better colors, because most browsers
+    // don't read colorprofiles and assume sRGB instead
     if($this->options['tosRGB']) {
       $command[] = '-profile ' . __DIR__ . DS . 'sRGB.icc';
     }
 
-    $command[] = '-resize';
+    // strip color profile after conversion,
+    // because sRGB is assumed by most browsers
+    $command[] = '-strip';
 
-    $dimensions = clone $this->source->dimensions();
-    $dimensions->fitWidthAndHeight($this->options['width'], $this->options['height'], $this->options['upscale']);
-    $command[] = $dimensions->width() . 'x' . $dimensions->height() . '!';
+    if($this->options['interlace']) {
+      $command[] = '-interlace line';
+    }
+
+    if($this->source->extension() === 'gif') {
+      $command[] = '-coalesce';
+    }
+
+    if($this->options['grayscale']) {
+      $command[] = '-colorspace gray';
+    }
 
     if($this->options['autoOrient']) {
       $command[] = '-auto-orient';
     }
-    
+
+    $command[] = '-resize';
+
+    if($this->options['crop']) {
+      $command[] = $this->options['width'] . 'x' . $this->options['height'] . '^';
+      $command[] = '-gravity Center -crop ' . $this->options['width'] . 'x' . $this->options['height'] . '+0+0';
+    } else {
+      $dimensions = clone $this->source->dimensions();
+      $dimensions->fitWidthAndHeight($this->options['width'], $this->options['height'], $this->options['upscale']);
+      $command[] = $dimensions->width() . 'x' . $dimensions->height() . '!';
+    }
+
     $command[] = '-quality ' . $this->options['quality'];
 
+    if($this->options['blur']) {
+      $command[] = '-blur 0x' . $this->options['blurpx'];
+    }
+
+    $command[] = '-limit thread 1';
     $command[] = escapeshellarg($this->destination->root());
 
-    $command = implode(' ', $command);
-
-    exec($command . ' 2>&1', $output, $status);
-    $success = $status === 0;
-    if (!$success) {
-      throw new Exception("Error processing image with command: " . $command . PHP_EOL . implode(PHP_EOL, $output));
-    }
+    exec(implode(' ', $command));
   }
-
-
 
 }
