@@ -1,4 +1,4 @@
-# ImageConverter – Kirby ImageConversion Class
+# Kirby ImageConverter
 
 This plugin for [Kirby 2](http://getkirby.com) allows you to convert your images to rgb and resize them down for web use. 
 
