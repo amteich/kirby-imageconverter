@@ -31,6 +31,7 @@ $ kirby plugin:install madergrafisch/kirby-imageconverter
 
 1. Clone or [download](https://github.com/madergrafisch/kirby-imageconverter/archive/master.zip)  this repository.
 2. Unzip the archive if needed and rename the folder to `kirby-imageconverter`.
+3. 
 **Make sure that the plugin folder structure looks like this:**
 ```
 site/plugins/kirby-imageconverter/
@@ -44,12 +45,11 @@ Use kirby 2 [panel upload hook](http://getkirby.com/docs/panel/hooks) to process
 kirby()->hook('panel.file.upload', function($file) {
 
   if ($file->type() == 'image') {
-    $image = new mgf\ImageConverter($file, array(
+		mgf\ImageConverter::convert($file, array(
       'width' => 1024,
       'height' => 1024,
       'tosRGB' => true,
     ));
-    $image->process();
   }
 
 });
@@ -60,28 +60,25 @@ kirby()->hook('panel.file.upload', function($file) {
 Create a new ImageConverter Object by passing a Media Object and some params. 
 
 ```php
-$image = new mgf\ImageConverter($image);
-$image->process();
+mgf\ImageConverter::convert($image);
 ```
 
 This uses the default options, like below. 
 
 ```php
-$image = new mgf\ImageConverter($image, array(
+mgf\ImageConverter::convert($image, array(
   'width' => 1024,
   'height' => 1024,
   'tosRGB' => true,
 ));
-$image->process();
-```php
+```
 
 This converts your image to a maximum size of 1024x1024 px and converts its colorspace to sRGB.
 
 ```php
-$image = new mgf\ImageConverter($image, array(
-  'filename' => '{name}_resized.{extension}',
+mgf\ImageConverter::convert($image, array(
+  'destination' => '{name}_resized.{extension}',
 ));
-$image->process();
 ```
 
 This creates a new image in the same destination, as the original image and adds the suffix '_resized' to the filename.
@@ -93,15 +90,20 @@ The class offers some options, most of them by the Kirby Thumb Class.
 ### Default Options
  
 ```php
-'filename'   => '{name}.{extension}'
+'destination'   => '{name}.{extension}'
 'url'        => null
 'root'       => null
 'quality'    => 100
-'width'      => 960
-'height'     => 960
+'blur'       => false
+'blurpx'     => 10
+'width'      => null
+'height'     => null
 'upscale'    => false
+'crop'       => false
+'grayscale'  => false
 'tosRGB'     => false
 'autoOrient' => false
+'interlace'  => false
 ```
 
 ## Credits
