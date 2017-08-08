@@ -23,7 +23,7 @@ If you are using the Kirby CLI you can install this plugin by running the follow
 
 ```
 $ cd path/to/kirby
-$ kirby plugin:install mgf/kirby-imageconverter
+$ kirby plugin:install madergrafisch/kirby-imageconverter
 ```
 
 
